@@ -44,6 +44,7 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.GET("/oauth/github", middleware.CriticalRateLimit(), middleware.SessionSecurity(), controller.GitHubOAuth)
 		apiRouter.GET("/oauth/lark", middleware.CriticalRateLimit(), middleware.SessionSecurity(), controller.LarkOAuth)
 		apiRouter.GET("/oauth/state", middleware.CriticalRateLimit(), middleware.SessionSecurity(), controller.GenerateOAuthCode)
+		apiRouter.POST("/oauth/invite_code", middleware.CriticalRateLimit(), middleware.SessionSecurity(), controller.SetOAuthInviteCode)
 		apiRouter.GET("/oauth/wechat", middleware.CriticalRateLimit(), middleware.SessionSecurity(), controller.WeChatAuth)
 		apiRouter.GET("/oauth/wechat/bind", middleware.CriticalRateLimit(), middleware.SessionSecurity(), middleware.UserAuth(), controller.WeChatBind)
 		apiRouter.GET("/oauth/email/bind", middleware.CriticalRateLimit(), middleware.SessionSecurity(), middleware.UserAuth(), controller.EmailBind)
@@ -110,6 +111,18 @@ func SetApiRouter(router *gin.Engine) {
 			optionRoute.POST("/invoice/gen/:time", controller.GenInvoice)
 			optionRoute.POST("/invoice/update/:time", controller.UpdateInvoice)
 			optionRoute.POST("/system_info/log", controller.SystemLog)
+		}
+
+		inviteCodeRoute := apiRouter.Group("/invite-code")
+		inviteCodeRoute.Use(middleware.AdminAuth())
+		{
+			inviteCodeRoute.GET("/", controller.GetInviteCodesList)
+			inviteCodeRoute.GET("/generate", controller.GenerateRandomInviteCode)
+			inviteCodeRoute.GET("/:id", controller.GetInviteCode)
+			inviteCodeRoute.POST("/", controller.CreateInviteCode)
+			inviteCodeRoute.PUT("/:id", controller.UpdateInviteCode)
+			inviteCodeRoute.DELETE("/:id", controller.DeleteInviteCode)
+			inviteCodeRoute.POST("/batch-delete", controller.BatchDeleteInviteCodes)
 		}
 
 		modelOwnedByRoute := apiRouter.Group("/model_ownedby")
